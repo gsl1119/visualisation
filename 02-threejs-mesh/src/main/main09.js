@@ -7,7 +7,7 @@ import gsap from "gsap";
 
 // 导入dat.gui
 import * as dat from "dat.gui";
-//  目标：加载进度
+//  目标：标准网格材质,置换贴图
 
 // 1.基础材质纹理
 const scence = new THREE.Scene();
@@ -25,27 +25,8 @@ camera.position.set(0, 0, 10);
 scence.add(camera);
 
 // 导入纹理
-
-// 设置加载管理器
-const loadingManager = new THREE.LoadingManager();
-loadingManager.onProgress = (e) => {
-  console.log("加载进度", e);
-};
-const textureLoader = new THREE.TextureLoader(loadingManager);
-const doorColorTexture = textureLoader.load(
-  "./textures/door/color.jpg",
-  // 单张纹理图的加载
-  () => {
-    console.log("加载完成");
-  },
-  (e) => {
-    console.log("图片加载进度", e);
-  },
-  (e) => {
-    console.log("图片加载错误", e);
-  }
-);
-
+const textureLoader = new THREE.TextureLoader();
+const doorColorTexture = textureLoader.load("./textures/door/color.jpg");
 const doorAplhaTexture = textureLoader.load("./textures/door/alpha.jpg");
 
 const doorAoTexture = textureLoader.load(
@@ -54,12 +35,7 @@ const doorAoTexture = textureLoader.load(
 
 // 导入置换贴图
 const doorHeightTextrue = textureLoader.load("./textures/door/height.jpg");
-// 导入粗糙贴图
-const roughnessTexture = textureLoader.load("./textures/door/roughness.jpg");
-// 导入金属贴图
-const metalnessTexture = textureLoader.load("./textures/door/metalness.jpg");
-// 导入法线贴图
-const normalTexture = textureLoader.load("./textures/door/normal.jpg");
+
 // 3、添加物体
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1, 100, 100, 100);
 // 材质
@@ -73,11 +49,6 @@ const material = new THREE.MeshStandardMaterial({
   displacementMap: doorHeightTextrue,
   aoMapIntensity: 1,
   displacementScale: 0.1,
-  roughness: 1,
-  roughnessMap: roughnessTexture,
-  metalness: 1,
-  metalnessMap: metalnessTexture,
-  normalMap: normalTexture,
   // side: THREE.DoubleSide,
 });
 // basicMaterial.side = THREE.DoubleSide;

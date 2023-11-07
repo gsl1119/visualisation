@@ -45311,7 +45311,7 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 
 // 导入dat.gui
 
-//  目标：纹理的显示算法
+//  目标：加载进度
 // 1.基础材质纹理
 var scence = new THREE.Scene();
 
@@ -45323,41 +45323,78 @@ camera.position.set(0, 0, 10);
 scence.add(camera);
 
 // 导入纹理
-var textureLoader = new THREE.TextureLoader();
-var doorColorTexture = textureLoader.load("./textures/door/color.jpg");
-var texture = textureLoader.load("./textures/minecraft.png");
 
-// 偏移
-// doorColorTexture.offset.x = 0.5;
-// doorColorTexture.offset.y = 0.5;
-// doorColorTexture.offset.set(0.5, 0.5);
-
-// 纹理的旋转
-// 设置旋转的原点
-// doorColorTexture.center.set(0.5, 0.5);
-// doorColorTexture.rotation = Math.PI / 4;
-
-// 纹理的重复
-// doorColorTexture.repeat.set(2, 3);
-// // 设置纹理重复的模式
-// doorColorTexture.wrapS = THREE.MirroredRepeatWrapping;
-// doorColorTexture.wrapT = THREE.RepeatWrapping;
-
-// texture纹理显示设置
-// texture.minFilter = THREE.NearestFilter;
-// texture.magFilter = THREE.NearestFilter;
-texture.minFilter = THREE.LinearFilter;
-texture.magFilter = THREE.LinearFilter;
-
-// 3、添加物体
-var cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-// 材质
-var basicMaterial = new THREE.MeshBasicMaterial({
-  color: "#fff000",
-  map: texture
+// 设置加载管理器
+var loadingManager = new THREE.LoadingManager();
+loadingManager.onProgress = function (e) {
+  console.log("加载进度", e);
+};
+var textureLoader = new THREE.TextureLoader(loadingManager);
+var doorColorTexture = textureLoader.load("./textures/door/color.jpg",
+// 单张纹理图的加载
+function () {
+  console.log("加载完成");
+}, function (e) {
+  console.log("图片加载进度", e);
+}, function (e) {
+  console.log("图片加载错误", e);
 });
-var cube = new THREE.Mesh(cubeGeometry, basicMaterial);
+var doorAplhaTexture = textureLoader.load("./textures/door/alpha.jpg");
+var doorAoTexture = textureLoader.load("./textures/door/ambientOcclusion.jpg");
+
+// 导入置换贴图
+var doorHeightTextrue = textureLoader.load("./textures/door/height.jpg");
+// 导入粗糙贴图
+var roughnessTexture = textureLoader.load("./textures/door/roughness.jpg");
+// 导入金属贴图
+var metalnessTexture = textureLoader.load("./textures/door/metalness.jpg");
+// 导入法线贴图
+var normalTexture = textureLoader.load("./textures/door/normal.jpg");
+// 3、添加物体
+var cubeGeometry = new THREE.BoxGeometry(1, 1, 1, 100, 100, 100);
+// 材质
+var material = new THREE.MeshStandardMaterial({
+  color: "#ffff00",
+  map: doorColorTexture,
+  alphaMap: doorAplhaTexture,
+  // opacity: 0.3,
+  transparent: true,
+  aoMap: doorAoTexture,
+  displacementMap: doorHeightTextrue,
+  aoMapIntensity: 1,
+  displacementScale: 0.1,
+  roughness: 1,
+  roughnessMap: roughnessTexture,
+  metalness: 1,
+  metalnessMap: metalnessTexture,
+  normalMap: normalTexture
+  // side: THREE.DoubleSide,
+});
+// basicMaterial.side = THREE.DoubleSide;
+var cube = new THREE.Mesh(cubeGeometry, material);
 scence.add(cube);
+
+// 给cube添加第二组uv
+cubeGeometry.setAttribute("uv2", new THREE.BufferAttribute(cubeGeometry.attributes.uv.array, 2));
+
+// 添加平面
+var planeGeometry = new THREE.PlaneGeometry(1, 1, 200, 200);
+var plane = new THREE.Mesh(planeGeometry, material);
+plane.position.set(1.5, 0, 0);
+scence.add(plane);
+
+// 给平面设置第二组uv
+planeGeometry.setAttribute("uv2", new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2));
+
+// 灯光
+// 环境光
+var light = new THREE.AmbientLight(0xffffff, 0.5);
+scence.add(light);
+
+// 设置直线光源
+var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+directionalLight.position.set(10, 10, 10);
+scence.add(directionalLight);
 
 // 4、初始化渲染器
 var renderer = new THREE.WebGL1Renderer();
@@ -45379,35 +45416,6 @@ scence.add(axesHelper);
 
 // 设置时钟
 var clock = new THREE.Clock();
-
-// 设置动画
-// gsap.to(cube.position, { x: 5, duration: 5 });
-// gsap.to(cube.rotation, { x: 2 * Math.PI, duration: 5 });
-
-// var animate1 = gsap.to(cube.position, {
-//   x: 5,
-//   duration: 5,
-//   ease: "power1.inOut",
-//   // 设置重复次数，无限次循环-1
-//   repeat: -1,
-//   // 往返运动
-//   yoyo: true,
-//   // delay，延迟2秒运动
-//   delay: 2,
-//   onComplete: () => {
-//     console.log("动画完成");
-//   },
-//   onStart: () => {
-//     console.log("动画开始 ");
-//   },
-// });
-// gsap.to(cube.rotation, {
-//   x: 2 * Math.PI,
-//   duration: 5,
-//   ease: "power1.inOut",
-//   // repeat,
-// });
-
 window.addEventListener("dblclick", function () {
   // 双击控制屏幕控制全屏，退出全屏
   var fullScreenElement = document.fullscreenElement;
@@ -45460,7 +45468,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56721" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58566" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

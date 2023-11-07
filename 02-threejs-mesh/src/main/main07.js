@@ -7,7 +7,7 @@ import gsap from "gsap";
 
 // 导入dat.gui
 import * as dat from "dat.gui";
-//  目标：加载进度
+//  目标：透明纹理
 
 // 1.基础材质纹理
 const scence = new THREE.Scene();
@@ -25,92 +25,53 @@ camera.position.set(0, 0, 10);
 scence.add(camera);
 
 // 导入纹理
-
-// 设置加载管理器
-const loadingManager = new THREE.LoadingManager();
-loadingManager.onProgress = (e) => {
-  console.log("加载进度", e);
-};
-const textureLoader = new THREE.TextureLoader(loadingManager);
-const doorColorTexture = textureLoader.load(
-  "./textures/door/color.jpg",
-  // 单张纹理图的加载
-  () => {
-    console.log("加载完成");
-  },
-  (e) => {
-    console.log("图片加载进度", e);
-  },
-  (e) => {
-    console.log("图片加载错误", e);
-  }
-);
-
+const textureLoader = new THREE.TextureLoader();
+const doorColorTexture = textureLoader.load("./textures/door/color.jpg");
 const doorAplhaTexture = textureLoader.load("./textures/door/alpha.jpg");
 
-const doorAoTexture = textureLoader.load(
-  "./textures/door/ambientOcclusion.jpg"
-);
+// const texture = textureLoader.load("./textures/minecraft.png");
 
-// 导入置换贴图
-const doorHeightTextrue = textureLoader.load("./textures/door/height.jpg");
-// 导入粗糙贴图
-const roughnessTexture = textureLoader.load("./textures/door/roughness.jpg");
-// 导入金属贴图
-const metalnessTexture = textureLoader.load("./textures/door/metalness.jpg");
-// 导入法线贴图
-const normalTexture = textureLoader.load("./textures/door/normal.jpg");
+// // 偏移
+// // doorColorTexture.offset.x = 0.5;
+// // doorColorTexture.offset.y = 0.5;
+// // doorColorTexture.offset.set(0.5, 0.5);
+
+// // 纹理的旋转
+// // 设置旋转的原点
+// // doorColorTexture.center.set(0.5, 0.5);
+// // doorColorTexture.rotation = Math.PI / 4;
+
+// // 纹理的重复
+// // doorColorTexture.repeat.set(2, 3);
+// // // 设置纹理重复的模式
+// // doorColorTexture.wrapS = THREE.MirroredRepeatWrapping;
+// // doorColorTexture.wrapT = THREE.RepeatWrapping;
+
+// // texture纹理显示设置
+// // texture.minFilter = THREE.NearestFilter;
+// // texture.magFilter = THREE.NearestFilter;
+// texture.minFilter = THREE.LinearFilter;
+// texture.magFilter = THREE.LinearFilter;
+
 // 3、添加物体
-const cubeGeometry = new THREE.BoxGeometry(1, 1, 1, 100, 100, 100);
+const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
 // 材质
-const material = new THREE.MeshStandardMaterial({
+const basicMaterial = new THREE.MeshBasicMaterial({
   color: "#ffff00",
   map: doorColorTexture,
-  alphaMap: doorAplhaTexture,
+  // alphaMap: doorAplhaTexture,
   // opacity: 0.3,
   transparent: true,
-  aoMap: doorAoTexture,
-  displacementMap: doorHeightTextrue,
-  aoMapIntensity: 1,
-  displacementScale: 0.1,
-  roughness: 1,
-  roughnessMap: roughnessTexture,
-  metalness: 1,
-  metalnessMap: metalnessTexture,
-  normalMap: normalTexture,
   // side: THREE.DoubleSide,
 });
 // basicMaterial.side = THREE.DoubleSide;
-const cube = new THREE.Mesh(cubeGeometry, material);
+const cube = new THREE.Mesh(cubeGeometry, basicMaterial);
 scence.add(cube);
 
-// 给cube添加第二组uv
-cubeGeometry.setAttribute(
-  "uv2",
-  new THREE.BufferAttribute(cubeGeometry.attributes.uv.array, 2)
-);
-
 // 添加平面
-const planeGeometry = new THREE.PlaneGeometry(1, 1, 200, 200);
-const plane = new THREE.Mesh(planeGeometry, material);
-plane.position.set(1.5, 0, 0);
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), basicMaterial);
+plane.position.set(3, 0, 0);
 scence.add(plane);
-
-// 给平面设置第二组uv
-planeGeometry.setAttribute(
-  "uv2",
-  new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2)
-);
-
-// 灯光
-// 环境光
-const light = new THREE.AmbientLight(0xffffff, 0.5);
-scence.add(light);
-
-// 设置直线光源
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-directionalLight.position.set(10, 10, 10);
-scence.add(directionalLight);
 
 // 4、初始化渲染器
 const renderer = new THREE.WebGL1Renderer();
@@ -132,6 +93,34 @@ scence.add(axesHelper);
 
 // 设置时钟
 const clock = new THREE.Clock();
+
+// 设置动画
+// gsap.to(cube.position, { x: 5, duration: 5 });
+// gsap.to(cube.rotation, { x: 2 * Math.PI, duration: 5 });
+
+// var animate1 = gsap.to(cube.position, {
+//   x: 5,
+//   duration: 5,
+//   ease: "power1.inOut",
+//   // 设置重复次数，无限次循环-1
+//   repeat: -1,
+//   // 往返运动
+//   yoyo: true,
+//   // delay，延迟2秒运动
+//   delay: 2,
+//   onComplete: () => {
+//     console.log("动画完成");
+//   },
+//   onStart: () => {
+//     console.log("动画开始 ");
+//   },
+// });
+// gsap.to(cube.rotation, {
+//   x: 2 * Math.PI,
+//   duration: 5,
+//   ease: "power1.inOut",
+//   // repeat,
+// });
 
 window.addEventListener("dblclick", () => {
   // 双击控制屏幕控制全屏，退出全屏
