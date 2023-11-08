@@ -45658,21 +45658,13 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 
 // 导入dat.gui
 
-// 记载hdr动图
-var rgbeLoader = new _RGBELoader.RGBELoader();
-rgbeLoader.loadAsync("textures/hdr/002.hdr").then(function (texture) {
-  texture.mapping = THREE.EquirectangularReflectionMapping;
-  scence.background = texture;
-  scence.environment = texture;
-});
-//  目标：灯光与阴影
+//  目标：阴影的属性
 // 灯光阴影
 // 1、材质要满足能够对光照有反应
 // 2、设置渲染器开启阴影的计算 renderer.shadowMap.enavled = true
 // 3、设置光照投射阴影 directionlLight.castShadow = true
 // 4、设置物体投影阴影 sphere.castShaow = true
 // 5、设置物体接收阴影 plane.receiveShaow = true
-
 // 1.基础材质纹理
 var scence = new THREE.Scene();
 
@@ -45683,18 +45675,20 @@ var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHei
 camera.position.set(0, 0, 10);
 scence.add(camera);
 
-// 设置cube为例加载器
-var cubeTexttureLoader = new THREE.CubeTextureLoader();
-var envMapTexture = cubeTexttureLoader.load(["textures/environmentMaps/1/px.jpg", "textures/environmentMaps/1/nx.jpg", "textures/environmentMaps/1/py.jpg", "textures/environmentMaps/1/ny.jpg", "textures/environmentMaps/1/pz.jpg", "textures/environmentMaps/1/nz.jpg"]);
+// 添加球
 var sphereGeometry = new THREE.SphereGeometry(1, 20, 20);
-var material = new THREE.MeshStandardMaterial({
-  metalness: 0.7,
-  roughness: 0.1
-  // envMap: envMapTexture,
-});
-
+var material = new THREE.MeshStandardMaterial();
 var spher = new THREE.Mesh(sphereGeometry, material);
+spher.castShadow = true;
 scence.add(spher);
+
+// 创建平面
+var planeGeometry = new THREE.PlaneGeometry(10, 10);
+var plane = new THREE.Mesh(planeGeometry, material);
+plane.position.set(0, -1, 0);
+plane.rotation.x = -Math.PI / 2;
+plane.receiveShadow = true;
+scence.add(plane);
 
 // // 给场景田间背景
 // scence.background = envMapTexture;
@@ -45709,12 +45703,28 @@ scence.add(light);
 // 设置直线光源
 var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(10, 10, 10);
+directionalLight.castShadow = true;
+
+// 设置阴影贴图模糊度
+directionalLight.shadow.radius = 20;
+// 设置阴影贴图的分辨率
+directionalLight.shadow.mapSize.set(2048, 2048);
+directionalLight.shadow.camera.top = 5;
+directionalLight.shadow.camera.bottom = -5;
+directionalLight.shadow.camera.left = -5;
+directionalLight.shadow.camera.right = 5;
 scence.add(directionalLight);
+var gui = new dat.GUI();
+gui.add(directionalLight.shadow.camera, "near").min(0).max(10).step(0.1).onChange(function () {
+  directionalLight.shadow.camera.updateProjectionMatrix();
+});
 
 // 4、初始化渲染器
 var renderer = new THREE.WebGL1Renderer();
 // 设置渲染的尺寸大小
 renderer.setSize(window.innerWidth, window.innerHeight);
+// 开启场景中的阴影贴图
+renderer.shadowMap.enabled = true;
 
 // 将webgl渲染内容添加到oody
 document.body.appendChild(renderer.domElement);
@@ -45783,7 +45793,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57724" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55870" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

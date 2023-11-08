@@ -9,7 +9,7 @@ import gsap from "gsap";
 import * as dat from "dat.gui";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
-//  目标：阴影的属性
+//  目标：灯光与阴影
 // 灯光阴影
 // 1、材质要满足能够对光照有反应
 // 2、设置渲染器开启阴影的计算 renderer.shadowMap.enavled = true
@@ -61,29 +61,7 @@ scence.add(light);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight.position.set(10, 10, 10);
 directionalLight.castShadow = true;
-
-// 设置阴影贴图模糊度
-directionalLight.shadow.radius = 20;
-// 设置阴影贴图的分辨率
-directionalLight.shadow.mapSize.set(2048, 2048);
-
-directionalLight.shadow.camera.top = 5;
-directionalLight.shadow.camera.bottom = -5;
-directionalLight.shadow.camera.left = -5;
-directionalLight.shadow.camera.right = 5;
-
 scence.add(directionalLight);
-
-const gui = new dat.GUI();
-
-gui
-  .add(directionalLight.shadow.camera, "near")
-  .min(0)
-  .max(10)
-  .step(0.1)
-  .onChange(() => {
-    directionalLight.shadow.camera.updateProjectionMatrix();
-  });
 
 // 4、初始化渲染器
 const renderer = new THREE.WebGL1Renderer();
