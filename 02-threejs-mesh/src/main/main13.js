@@ -16,13 +16,7 @@ rgbeLoader.loadAsync("textures/hdr/002.hdr").then((texture) => {
   scence.background = texture;
   scence.environment = texture;
 });
-//  目标：灯光与阴影
-// 灯光阴影
-// 1、材质要满足能够对光照有反应
-// 2、设置渲染器开启阴影的计算 renderer.shadowMap.enavled = true
-// 3、设置光照投射阴影 directionlLight.castShadow = true
-// 4、设置物体投影阴影 sphere.castShaow = true
-// 5、设置物体接收阴影 plane.receiveShaow = true
+//  目标：加载进度
 
 // 1.基础材质纹理
 const scence = new THREE.Scene();
