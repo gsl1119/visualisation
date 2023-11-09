@@ -45658,13 +45658,7 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 
 // 导入dat.gui
 
-//  目标：阴影的属性
-// 灯光阴影
-// 1、材质要满足能够对光照有反应
-// 2、设置渲染器开启阴影的计算 renderer.shadowMap.enavled = true
-// 3、设置光照投射阴影 directionlLight.castShadow = true
-// 4、设置物体投影阴影 sphere.castShaow = true
-// 5、设置物体接收阴影 plane.receiveShaow = true
+//  目标：聚光灯
 // 1.基础材质纹理
 var scence = new THREE.Scene();
 
@@ -45690,34 +45684,33 @@ plane.rotation.x = -Math.PI / 2;
 plane.receiveShadow = true;
 scence.add(plane);
 
-// // 给场景田间背景
-// scence.background = envMapTexture;
-// // 给场景所有的物体添加默认的环境贴图
-// scence.environment = envMapTexture;
-
 // 灯光
 // 环境光
 var light = new THREE.AmbientLight(0xffffff, 0.5);
 scence.add(light);
+var smallBall = new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 20), new THREE.MeshBasicMaterial({
+  color: 0xff0000
+}));
+smallBall.position.set(2, 2, 2);
+// 设置聚光光源
+var pointLight = new THREE.PointLight(0xff0000, 2);
+pointLight.position.set(2, 2, 2);
+pointLight.castShadow = true;
+pointLight.shadow.radius = 20;
 
-// 设置直线光源
-var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-directionalLight.position.set(10, 10, 10);
-directionalLight.castShadow = true;
+// spotLight.shadow.mapSize.set(2048, 2048);
+// spotLight.target = spher;
+// spotLight.angle = Math.PI / 6;
+pointLight.distance = 0;
+// spotLight.penumbra = 0;
+pointLight.decay = 0; // 在物理模式下
 
-// 设置阴影贴图模糊度
-directionalLight.shadow.radius = 20;
-// 设置阴影贴图的分辨率
-directionalLight.shadow.mapSize.set(2048, 2048);
-directionalLight.shadow.camera.top = 5;
-directionalLight.shadow.camera.bottom = -5;
-directionalLight.shadow.camera.left = -5;
-directionalLight.shadow.camera.right = 5;
-scence.add(directionalLight);
+smallBall.add(pointLight);
+scence.add(smallBall);
 var gui = new dat.GUI();
-gui.add(directionalLight.shadow.camera, "near").min(0).max(10).step(0.1).onChange(function () {
-  directionalLight.shadow.camera.updateProjectionMatrix();
-});
+gui.add(pointLight.position, "x").min(-5).max(5).step(0.1);
+gui.add(pointLight, "distance").min(0).max(10).step(0.01);
+gui.add(pointLight, "decay").min(0).max(5).step(0.01);
 
 // 4、初始化渲染器
 var renderer = new THREE.WebGL1Renderer();
@@ -45725,6 +45718,7 @@ var renderer = new THREE.WebGL1Renderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 // 开启场景中的阴影贴图
 renderer.shadowMap.enabled = true;
+renderer.physicallyCorrectLights = true;
 
 // 将webgl渲染内容添加到oody
 document.body.appendChild(renderer.domElement);
@@ -45751,6 +45745,10 @@ window.addEventListener("dblclick", function () {
   }
 });
 function render() {
+  var time = clock.getElapsedTime();
+  smallBall.position.x = Math.sin(time) * 3;
+  smallBall.position.z = Math.cos(time) * 3;
+  smallBall.position.y = 2 + Math.sin(time * 10);
   controls.update();
   renderer.render(scence, camera);
   requestAnimationFrame(render);
@@ -45793,7 +45791,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55870" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59094" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

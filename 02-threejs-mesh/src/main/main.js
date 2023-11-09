@@ -9,13 +9,7 @@ import gsap from "gsap";
 import * as dat from "dat.gui";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 
-//  目标：阴影的属性
-// 灯光阴影
-// 1、材质要满足能够对光照有反应
-// 2、设置渲染器开启阴影的计算 renderer.shadowMap.enavled = true
-// 3、设置光照投射阴影 directionlLight.castShadow = true
-// 4、设置物体投影阴影 sphere.castShaow = true
-// 5、设置物体接收阴影 plane.receiveShaow = true
+//  目标：聚光灯
 
 // 1.基础材质纹理
 const scence = new THREE.Scene();
@@ -57,33 +51,22 @@ scence.add(plane);
 const light = new THREE.AmbientLight(0xffffff, 0.5);
 scence.add(light);
 
-// 设置直线光源
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-directionalLight.position.set(10, 10, 10);
-directionalLight.castShadow = true;
+// 设置聚光光源
+const spotLight = new THREE.SpotLight(0xffffff, 0.5);
+spotLight.position.set(10, 10, 10);
+spotLight.castShadow = true;
 
-// 设置阴影贴图模糊度
-directionalLight.shadow.radius = 20;
-// 设置阴影贴图的分辨率
-directionalLight.shadow.mapSize.set(2048, 2048);
+spotLight.shadow.radius = 20;
 
-directionalLight.shadow.camera.top = 5;
-directionalLight.shadow.camera.bottom = -5;
-directionalLight.shadow.camera.left = -5;
-directionalLight.shadow.camera.right = 5;
+spotLight.shadow.mapSize.set(2048, 2048);
+spotLight.target = spher;
+spotLight.angle = Math.PI / 6;
+spotLight.distance = 0;
+spotLight.penumbra = 0;
+spotLight.decay = 0; // 在物理模式下
 
-scence.add(directionalLight);
-
+scence.add(spotLight);
 const gui = new dat.GUI();
-
-gui
-  .add(directionalLight.shadow.camera, "near")
-  .min(0)
-  .max(10)
-  .step(0.1)
-  .onChange(() => {
-    directionalLight.shadow.camera.updateProjectionMatrix();
-  });
 
 // 4、初始化渲染器
 const renderer = new THREE.WebGL1Renderer();
@@ -91,6 +74,7 @@ const renderer = new THREE.WebGL1Renderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 // 开启场景中的阴影贴图
 renderer.shadowMap.enabled = true;
+renderer.physicallyCorrectLights = true;
 
 // 将webgl渲染内容添加到oody
 document.body.appendChild(renderer.domElement);
