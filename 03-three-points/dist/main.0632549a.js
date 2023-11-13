@@ -44948,7 +44948,7 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 
 // 导入dat.gui
 
-// 目标：认识pointes
+// 目标：使用pointes设置随机顶点打造星河
 
 var gui = new dat.GUI();
 // 1、创建场景
@@ -44962,13 +44962,19 @@ camera.position.set(0, 0, 10);
 scene.add(camera);
 
 // 创建球几何体
-var sphereGeometry = new THREE.SphereBufferGeometry(3, 30, 30);
-// const material = new THREE.MeshBasicMaterial({
-//   color: 0xff0000,
-//   wireframe: true,
-// });
-// const mesh = new THREE.Mesh(sphereGeometry, material);
-// scene.add(mesh);
+var particalesGeometry = new THREE.BufferGeometry();
+var count = 5000;
+
+// 设置缓冲区数组
+var positions = new Float32Array(count * 3);
+// 设置例子顶点的颜色
+var colors = new Float32Array(count * 3);
+for (var i = 0; i < count * 3; i++) {
+  positions[i] = (Math.random() - 0.5) * 30;
+  colors[i] = Math.random();
+}
+particalesGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+particalesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
 // 设置点材质
 var pointsMaterial = new THREE.PointsMaterial();
@@ -44979,14 +44985,17 @@ pointsMaterial.sizeAttenuation = true;
 
 // 载入纹理
 var textureLoader = new THREE.TextureLoader();
-var texture = textureLoader.load("./textures/particles/2.png");
+var texture = textureLoader.load("./textures/particles/1.png");
 // 设置点材质纹理
 pointsMaterial.map = texture;
 pointsMaterial.alphaMap = texture;
 pointsMaterial.transparent = true;
 pointsMaterial.depthWrite = false;
 pointsMaterial.blending = THREE.AdditiveBlending;
-var points = new THREE.Points(sphereGeometry, pointsMaterial);
+
+// 设置穹顶点的颜色
+pointsMaterial.vertexColors = true;
+var points = new THREE.Points(particalesGeometry, pointsMaterial);
 scene.add(points);
 
 // 初始化渲染器
@@ -45061,7 +45070,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65161" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51228" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

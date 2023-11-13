@@ -30,19 +30,9 @@ const count = 5000;
 
 // 设置缓冲区数组
 const positions = new Float32Array(count * 3);
-// 设置例子顶点的颜色
-const colors = new Float32Array(count * 3);
-
 for (let i = 0; i < count * 3; i++) {
-  positions[i] = (Math.random() - 0.5) * 30;
-  colors[i] = Math.random();
+  positions[i] = Math.random() * 5;
 }
-
-particalesGeometry.setAttribute(
-  "position",
-  new THREE.BufferAttribute(positions, 3)
-);
-particalesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
 // 设置点材质
 const pointsMaterial = new THREE.PointsMaterial();
@@ -53,7 +43,7 @@ pointsMaterial.sizeAttenuation = true;
 
 // 载入纹理
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load("./textures/particles/1.png");
+const texture = textureLoader.load("./textures/particles/2.png");
 // 设置点材质纹理
 pointsMaterial.map = texture;
 pointsMaterial.alphaMap = texture;
@@ -61,10 +51,7 @@ pointsMaterial.transparent = true;
 pointsMaterial.depthWrite = false;
 pointsMaterial.blending = THREE.AdditiveBlending;
 
-// 设置穹顶点的颜色
-pointsMaterial.vertexColors = true;
-
-const points = new THREE.Points(particalesGeometry, pointsMaterial);
+const points = new THREE.Points(sphereGeometry, pointsMaterial);
 
 scene.add(points);
 
